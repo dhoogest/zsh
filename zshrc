@@ -32,15 +32,12 @@ if [ -f "${zsh_initdir}"/aliases ]; then
 	. "${zsh_initdir}"/aliases
 fi
 
+##
+# Read user's alias definitions
+##
+
 if [ -f "${user_zsh_initdir}"/aliases.mine ]; then
 	. "${user_zsh_initdir}"/aliases.mine
-fi
-
-##
-# Read user's environment variable definitions
-##
-if [ -f "${user_zsh_initdir}"/environment.mine ]; then
-	. "${user_zsh_initdir}"/environment.mine
 fi
 
 # Source function definitions
