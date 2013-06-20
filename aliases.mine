@@ -1,0 +1,53 @@
+if [ $NOISY ]; then
+	echo "reading ~/Library/init/zsh/aliases.mine"
+fi
+
+# aliases using 'open'
+if [[ $USER = "nghoffma" ]]; then
+	OFFICE="/Applications/Microsoft Office X"
+else
+	OFFICE="/Applications/Microsoft Office 2004"
+fi
+
+USER_APPS="${HOME}/Applications"
+
+alias te='/usr/bin/bbedit $*'
+alias preview='open -a /Applications/Preview.app $*'
+alias gimp="open -a /Applications/Gimp.app $*"
+
+alias ec="/Applications/Emacs.app/Contents/MacOS/bin/emacsclient -c &"
+alias emacsd="/Applications/Emacs.app/Contents/MacOS/Emacs --daemon"
+alias emacs='/Applications/Emacs.app/Contents/MacOS/Emacs -nw'
+alias Emacs='open -a emacs'
+
+alias labmedh='ssh -l labmed1 homer.u.washington.edu'
+alias labmedo='ssh -l labmed1 ovid.u.washington.edu'
+alias labmedf='sftp labmed1@homer.u.washington.edu'
+
+alias mdxh='ssh -l mdx homer.u.washington.edu'
+alias mdxo='ssh -l mdx ovid.u.washington.edu'
+alias mdxf='sftp mdx@homer.u.washington.edu'
+
+alias molmicdxh='ssh -l molmicdx homer.u.washington.edu'
+alias molmicdxo='ssh -l molmicxdx ovid.u.washington.edu'
+alias molmicdxf='sftp molmicdx@homer.u.washington.edu'
+
+alias uwmail='ssh -At dhoogest@ovid.u.washington.edu "alpine"'
+alias ovid='ssh -At dhoogest@ovid.u.washington.edu'
+
+alias lis='ssh -t alab@lab0.labmed.washington.edu'
+alias listest='ssh -t test@lab0.labmed.washington.edu'
+alias mdx='ssh -AtY -l dhoogest 172.25.186.130'
+alias cooksonmicro='ssh -AtY -l cooksonmicro 172.25.186.130'
+alias work='ssh work'
+
+alias dhoogesth='ssh -l dhoogest homer.u.washington.edu'
+alias dhoogesto='ssh -l dhoogest ovid.u.washington.edu'
+alias dhoogestf='sftp dhoogest@homer.u.washington.edu'
+
+alias tunnel='ssh -fNg -L 3307:127.0.0.1:3306 dhoogest@128.95.251.170'
+alias cooksonmicro='ssh -AtY -l cooksonmicro 128.95.251.170'
+alias sci='ssh -AtY hoogestraat@sci.labmed.washington.edu'
+alias mdxdb='mysql -p mdx -h 127.0.0.1 -P 3307'
+
+alias oo='open -a /Applications/OpenOffice.org.app/'

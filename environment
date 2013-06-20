@@ -1,0 +1,488 @@
+if [ $NOISY ]; then
+	echo "reading ~/Library/init/zsh/environment"
+fi
+
+#$Id$
+
+default_zsh_initdir=/Library/init/zsh
+user_zsh_initdir=~/Library/init/zsh
+
+if [ -r "${default_zsh_initdir}" ]; then
+	zsh_initdir="${default_zsh_initdir}"
+else
+	zsh_initdir="${user_zsh_initdir}"
+fi
+zdotdir="${zsh_initdir}"
+
+# define appendPath and prependPath to add directory paths, e.g. PATH, MANPATH.
+# add to end of path
+appendPath()
+{
+	if eval test -z \"\$$1\" ; then
+		eval "$1=$2"
+	elif ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+		eval "$1=\$$1:$2"
+	fi
+}
+
+# add to front of path
+prependPath()
+{
+	if eval test -z \"\$$1\" ; then
+		eval "$1=$2"
+	elif ! eval test -z "\"\${$1##*:$2:*}\"" -o -z "\"\${$1%%*:$2}\"" -o -z "\"\${$1##$2:*}\"" -o -z "\"\${$1##$2}\"" ; then
+		eval "$1=$2:\$$1"
+	fi
+}
+
+
+prependPath PATH /usr/local/sbin
+prependPath PATH /opt/local/bin
+prependPath PATH ~/bin
+prependPath PATH /usr/local/bin
+prependPath PATH .
+
+appendPath PATH /usr/bin
+appendPath PATH /bin
+appendPath PATH /usr/sbin
+appendPath PATH /sbin
+appendPath PATH /Developer/Tools
+appendPath PATH /usr/local/mysql/bin
+appendPath PATH /usr/local/mysql/lib
+appendPath PATH /Library/Frameworks/Python.framework/Versions/2.7/bin
+
+export PATH
+
+#PYTHONSTARTUP="${HOME}/.pythonrc.py"
+#export PYTHONSTARTUP
+
+EDITOR="edit -w"
+export EDITOR
+
+SVN_EDITOR="edit -w"
+export SVN_EDITOR
+
+GNUTERM=aqua
+export GNUTERM
+
+GNUTERMAPP=/Applications/AquaTerm.app
+export GNUTERMAPP
+
+# prevents less from vanishing after q
+LESS='-XRse' 
+export LESS
+###########################
+
+#JAVA_CMD=/usr/bin/java
+
+#JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home 
+#export JAVA_HOME
+
+SVNROOT=https://128.95.186.202/
+export SVNROOT
+
+CLASSPATH=.:/System/Library/Frameworks/JavaVM.framework/Home:/System/Library/Frameworks/JavaVM.framework/Classes/classes.jar:/System/Library/Frameworks/JavaVM.framework/Classes/ui.jar
+export CLASSPATH
+
+MYFLAGS="-no-cpp-precomp"
+# start shell like this to avoid fink-specific environment variables:
+# env -i NOFINK=YES TERM=$TERM zsh
+if [[ -e /sw/bin/init.sh && ! -n "$NOFINK" ]]; then 
+	source /sw/bin/init.sh
+	MYFLAGS="$MYFLAGS -L/sw/lib -I/sw/include"
+fi
+
+CC=cc
+export CC
+
+CFLAGS="$MYFLAGS"
+export CFLAGS
+
+CCFLAGS="$MYFLAGS"
+
+CPPFLAGS="$MYFLAGS"
+export CPPFLAGS
+
+LC_ALL=C
+export LC_ALL
+
+export host="--host=powerpc-apple-darwin"
+
+if [[ -o interactive ]]; then
+
+	function _exit()        # function to run upon exit of shell
+	{
+		echo -e "[1;31mHasta la vista, baby![0m"
+	}
+	trap _exit 0
+
+	HISTSIZE=500
+	HISTFILE=~/.zsh_history
+	SAVEHIST=500
+	export HISTFILE HISTSIZE SAVEHIST
+
+	#---------------
+	# Shell prompt
+	#---------------
+	if [ -f "${zsh_initdir}"/prompt ]; then
+		. "${zsh_initdir}"/prompt
+	fi
+
+	# This alters the default behavior of the  completion
+	# functions.   If  set  to  on, words which have more
+	# than one possible completion cause the  matches  to
+	# be  listed immediately instead of ringing the bell.
+	#
+	#set show-all-if-ambiguous on
+
+	if [ -z $DISPLAY ]
+	then
+		DISPLAY=':0.0'
+		export DISPLAY
+	fi
+
+	compctl -D -f + -U -Q -K multicomp
+	
+	# commented out by NH
+	#. "${zsh_initdir}"/compctl
+
+	# {{{ What version are we running?
+
+	if ! (( $+ZSH_VERSION_TYPE )); then
+	  if [[ $ZSH_VERSION == 3.0.<->* ]]; then ZSH_STABLE_VERSION=yes; fi
+	  if [[ $ZSH_VERSION == 3.1.<->* ]]; then ZSH_DEVEL_VERSION=yes;  fi
+
+	  ZSH_VERSION_TYPE=old
+	  if [[ $ZSH_VERSION == 3.1.<6->* ||
+	        $ZSH_VERSION == 3.<2->.<->*  ||
+	        $ZSH_VERSION == 4.<->* ]]
+	  then
+	    ZSH_VERSION_TYPE=new
+	  fi
+	fi
+
+	# }}}
+	# {{{ Profiling
+
+	[[ -n "$ZSH_PROFILE_RC" ]] && which zmodload >&/dev/null && zmodload zsh/zprof
+
+	# }}}
+	# {{{ Loading status
+
+	zshrc_load_status () {
+	  # \e[0K is clear to right
+	  echo -n "\r.zshrc load: $* ... \e[0K"
+	}
+
+	# }}}
+	# {{{ Options
+
+	zshrc_load_status 'setting options'
+
+	setopt                       \
+	        append_history       \
+	        auto_list            \
+	        auto_menu            \
+	        auto_param_keys      \
+	     NO_auto_pushd           \
+	        bad_pattern          \
+	        bang_hist            \
+	        brace_ccl            \
+	        correct_all          \
+	        cdable_vars          \
+	     NO_chase_links          \
+	        complete_in_word     \
+	     NO_csh_junkie_loops     \
+	     NO_csh_junkie_quotes    \
+	     NO_csh_null_glob        \
+	        extended_glob        \
+	        function_argzero     \
+	        glob                 \
+	     NO_glob_assign          \
+	        glob_complete        \
+	     NO_glob_dots            \
+	        glob_subst           \
+	        hash_cmds            \
+	        hash_dirs            \
+	        hash_list_all        \
+	        hist_allow_clobber   \
+	        hist_beep            \
+	     NO_hup                  \
+	     NO_ignore_braces        \
+	        ignore_eof           \
+	        interactive_comments \
+	     NO_list_ambiguous       \
+	        list_types           \
+	        long_list_jobs       \
+	        magic_equal_subst    \
+	     NO_mark_dirs            \
+	        multios              \
+	        nomatch              \
+	        notify               \
+	     NO_null_glob            \
+	        path_dirs            \
+	        posix_builtins       \
+	     NO_print_exit_value     \
+	        pushd_ignore_dups    \
+	     NO_pushd_minus          \
+	        pushd_to_home        \
+	        rc_expand_param      \
+	     NO_rc_quotes            \
+	     NO_rm_star_silent       \
+	     NO_sh_file_expansion    \
+	        sh_word_split     \
+	        short_loops          \
+	     NO_single_line_zle      \
+	     NO_sun_keyboard_hack    \
+	        unset                \
+	     NO_verbose                 
+	#        zle       \
+	#     NO_all_export           \
+	#        always_last_prompt   \
+	#     NO_always_to_end        \
+	#     NO_auto_cd              \
+	#     NO_auto_name_dirs       \
+	#        auto_param_slash     \
+	#        auto_remove_slash    \
+	#     NO_auto_resume          \
+	#     NO_beep                 \
+	#     NO_bsd_echo             \
+	#        complete_aliases     \
+	#     NO_correct              \
+	#        csh_junkie_history   \
+	#        equals               \
+	#        extended_history     \
+	#        hist_ignore_dups     \
+	#        hist_ignore_space    \
+	#     NO_hist_no_store        \
+	#        hist_verify          \
+	#     NO_ignore_eof           \
+	#     NO_list_beep            \
+	#     NO_mail_warning         \
+	#     NO_menu_complete        \
+	#        numeric_glob_sort    \
+	#     NO_overstrike           \
+	#     NO_prompt_cr            \
+	#        prompt_subst         \
+	#        pushd_silent         \
+	#        sh_option_letters    \
+	#     NO_sh_word_split     \
+
+	if [[ $ZSH_VERSION == 3.0.<6->* || $ZSH_VERSION_TYPE == 'new' ]]; then
+	  setopt \
+	        hist_reduce_blanks
+	fi
+
+	# }}}
+	# {{{ Watching for other users
+
+	LOGCHECK=60
+	WATCHFMT="[%B%t%b] %B%n%b has %a %B%l%b from %B%M%b"
+
+	# }}}
+	# {{{ Completions
+
+	zshrc_load_status 'completion system'
+
+	# {{{ New advanced completion system
+
+	if [[ "$ZSH_VERSION_TYPE" == 'new' ]]; then
+	  autoload -U compinit
+	  compinit -C # don't perform security check
+	else
+	  print "\nAdvanced completion system not found; ignoring zstyle settings."
+	  function zstyle { }
+	  function compdef { }
+
+	  # an antiquated, barebones completion system is better than nowt
+	  which zmodload >&/dev/null && zmodload zsh/compctl
+	fi
+
+	##
+	## Enable the way cool bells and whistles.
+	##
+
+	# enable menu selection
+	# zstyle ':completion:*' menu select=6
+
+	# General completion technique
+	#zstyle ':completion:*' completer _complete _correct _approximate _prefix
+	zstyle ':completion:*' completer _complete _prefix
+	zstyle ':completion::prefix-1:*' completer _complete
+	zstyle ':completion:incremental:*' completer _complete _correct
+	zstyle ':completion:predict:*' completer _complete
+
+	# Completion caching
+	zstyle ':completion::complete:*' use-cache 1
+	zstyle ':completion::complete:*' cache-path ~/.zsh/cache/$HOST
+
+	# Expand partial paths
+	zstyle ':completion:*' expand 'yes'
+	zstyle ':completion:*' squeeze-slashes 'yes'
+
+	# Include non-hidden directories in globbed file completions
+	# for certain commands
+	#zstyle ':completion::complete:*' \
+	#  tag-order 'globbed-files directories' all-files 
+	#zstyle ':completion::complete:*:tar:directories' file-patterns '*~.*(-/)'
+
+	# Don't complete backup files as executables
+	zstyle ':completion:*:complete:-command-::commands' ignored-patterns '*\~'
+
+	# Separate matches into groups
+	zstyle ':completion:*:matches' group 'yes'
+
+	# Describe each match group.
+	zstyle ':completion:*:descriptions' format "%B---- %d%b"
+
+	# Messages/warnings format
+	zstyle ':completion:*:messages' format '%B%U---- %d%u%b' 
+	zstyle ':completion:*:warnings' format '%B%U---- no match for: %d%u%b'
+	 
+	# Describe options in full
+	zstyle ':completion:*:options' description 'yes'
+	zstyle ':completion:*:options' auto-description '%d'
+
+	# }}}
+	# {{{ Simulate my old dabbrev-expand 3.0.5 patch 
+
+	zstyle ':completion:*:history-words' stop yes
+	zstyle ':completion:*:history-words' remove-all-dups yes
+	zstyle ':completion:*:history-words' list false
+	zstyle ':completion:*:history-words' menu yes
+
+	# }}}
+	# {{{ Common hostnames
+
+	hosts=(
+	    "$_etc_hosts[@]"
+
+	    localhost
+
+	    # ftp sites
+	    sunsite.org.uk
+	    developer.apple.com
+	)
+
+	zstyle ':completion:*' hosts $hosts
+
+	# }}}
+	# {{{ (host, port, user) triples for telnet
+
+	telnet_users_hosts_ports=(
+	)
+	zstyle ':completion:*:*:telnet:*' users-hosts-ports $telnet_users_hosts_ports
+
+	# }}}
+	# {{{ which
+
+	# reverse unwanted aliasing of `which' by distribution startup
+	# files (e.g. /etc/profile.d/which*.sh); zsh's which is perfectly
+	# good as is.
+
+	alias which >&/dev/null && unalias which
+
+	# }}}
+	# {{{ run-help
+
+	alias run-help >&/dev/null && unalias run-help
+	autoload run-help
+
+	# }}}
+	# {{{ zcalc
+
+	autoload zcalc
+
+	# }}}
+	# {{{ Restarting zsh or bash; reloading .zshrc or functions
+
+	bash () {
+	  NO_SWITCH="yes" command bash "$@"
+	}
+
+	restart () {
+	  exec $SHELL $SHELL_ARGS "$@"
+	}
+
+	profile () {
+	  ZSH_PROFILE_RC=1 $SHELL "$@"
+	}
+
+	reload () {
+	  if [[ "$#*" -eq 0 ]]; then
+	    . $zdotdir/.zshrc
+	  else
+	    local fn
+	    for fn in "$@"; do
+	      unfunction $fn
+	      autoload -U $fn
+	    done
+	  fi
+	}
+	compdef _functions reload
+
+	# }}}
+
+	# }}}
+	# {{{ Key bindings 
+
+	zshrc_load_status 'key bindings'
+
+	bindkey '\e[A'  up-line-or-history
+	bindkey '\e[B'  down-line-or-history
+
+	bindkey -s '^X^Z' '%-^M'
+	bindkey '^[e' expand-cmd-path
+	#bindkey -s '^X?' '\eb=\ef\C-x*'
+	bindkey '^[^I' reverse-menu-complete
+	bindkey '^X^N' accept-and-infer-next-history
+	#bindkey '^[p' history-beginning-search-backward
+	#bindkey '^[n' history-beginning-search-forward
+	bindkey '^[P' history-beginning-search-backward
+	bindkey '^[N' history-beginning-search-forward
+	bindkey '^[b' emacs-backward-word
+	bindkey '^[f' emacs-forward-word
+	bindkey '^[v' expand-or-complete-prefix
+
+	# Fix weird sequence that rxvt produces
+	bindkey -s '^[[Z' '\t'
+
+	# alias no=ls  # for Dvorak
+
+	# }}}
+	# {{{ Miscellaneous
+
+	zshrc_load_status 'miscellaneous'
+
+	# {{{ ls colours
+
+	if which dircolors >&/dev/null && [[ -e "${zdotdir}/.dircolors" ]]; then
+	  # show directories in yellow
+	  eval `dircolors -b $zdotdir/.dircolors`
+	fi
+
+	if [[ $ZSH_VERSION > 3.1.5 ]]; then
+	  zmodload -i zsh/complist
+
+	  zstyle ':completion:*' list-colors ''
+
+	  zstyle ':completion:*:*:kill:*:processes' list-colors \
+	    '=(#b) #([0-9]#)*=0=01;31'
+
+	  # completion colours
+	  zstyle ':completion:*' list-colors "$LS_COLORS"
+	fi  
+
+	#--------------- Completions added by NH
+	#------------------------------------------------------------------------------
+	# This from the iTerm website: http://iterm.sourceforge.net/resource.shtml
+	if [ "`uname`" = "Darwin" ]; then
+	   compctl -f -x 'p[2]' -s "`/bin/ls -d1 /Applications/*/*.app /Applications/*.app | sed 's|^.*/\([^/]*\)\.app.*|\\1|;s/ /\\\\ /g'`" -- open
+	   alias run='open -a'
+	fi
+	#------------------------------------------------------------------------------
+
+	# }}}
+
+	# }}}
+fi

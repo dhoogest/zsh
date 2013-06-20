@@ -1,0 +1,18 @@
+Hi all,
+
+I have replaced all references to my HOME directory with tildes, "~". It may actually work to leave them in but if not, you can do a search and replace to put references to your HOME directory in place of the tildes.
+
+I have entries that refer to apps that you may not have installed. They shouldn't cause any problems but you can remove them as desired, I won't sue. Just don't sue me if these files turn your computer into a doorstop. If you have any problems, feel free to e-mail my at gkerbaugh@nc.rr.com. (if your computer can still send e-mail)
+
+I hope you like some of the aliases. I think the prompt is really nice as well but it is set in the prompt file and you can exit that "to taste". The completions were stolen from another source but they are wonderful, so I'm including them as well. Completions are one of zsh's best features.
+
+When you untar these files in your HOME directory, the files should be put into a new directory, ~/Library/init/zsh. You should create a .zshrc file in your HOME directory by executing the following:
+
+echo '. ~/Library/init/zsh/zshrc' > ~/.zshrc
+
+Alternatively, you can untar these files in the directory of your boot drive, in which case the files will be put into a new directory, /Library/init/zsh. You should create a .zshrc file in your HOME directory by executing the following:
+
+sudo echo '. /Library/init/zsh/zshrc' > /etc/zshrc
+
+Naturally I hope these files configure your zsh exactly as mine do and that you like it as much as I like mine.
+

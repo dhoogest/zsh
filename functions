@@ -1,0 +1,203 @@
+if [ $NOISY ]; then
+	echo "reading ~/Library/init/zsh/functions"
+fi
+
+#$Id: functions,v 1.8 2005/12/23 05:22:53 nghoffma Exp $
+
+function fds { sudo find / -name ${1} -print; }
+function fdsa { sudo find / -name "*${1}*" -print; }
+function pgrep { ps -auxww | grep "${1}" | grep -v "[p ]grep"; }
+function hgrep { history 1 | grep -i "${1}" | grep -v "[hp ]grep"; }
+function pidof { ps -axww | grep -v "awk" | awk -F" " "/$1/{ print \$1 } "; }
+# function pidof { temp=$( ps -ax | grep "$1" | grep -v " grep " ); echo "${temp%%' '}"; }
+function errnum { grep -i "[ -]${1}[ ,]" /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/CarbonCore.framework/Versions/Current/Headers/MacErrors.h; }
+function ldirs { ls -AFlh --color=always ${1} | grep "^d"; }
+function go { osascript -e 'open location $1'; }
+
+function stoppedjobs { jobs -s | wc -l | awk '{print $1}'; }
+lf(){ ls -lh --color=always ${*} | egrep "^d"; ls -lh $* 2>&-| egrep -v "^d|total "; }
+function gunall { ls $* | xargs -n 1 tar -zxvf; }
+function ll { ls -AFlgh --color=always "$@" | more; }
+
+# showalias: to remind yourself of an alias (given some part of it)
+function showalias { grep $* ~/Library/init/bash/aliases; grep $* ~/Library/init/bash/functions; }
+
+# lsock: List open sockets
+function lsock { sudo lsof -i; }
+
+# llock: List all locked files in subdirectories of the argument
+function llock { find $* -exec GetFileInfo {} \; | sed -n -e '/file/{h;}' -e '/attribute.*L/{g;p;}'; } 
+
+# ppath: list the Perl #INC path
+function ppath { perl -e 'print map "$_\n", @INC'; } 
+
+# invgrep: grep through invisible files for arguments
+function invgrep { ls -A1 | sed -n '/^\./p' | xargs -n1 grep -iInH "$1"; }
+
+# ldot: list <dot>files
+function ldot { if [ -n "$1" ]; then
+	ls -AFlh --color=always "$1"/\.[^\.]*;
+else
+	ls -AFlh --color=always \.[^\.]*;
+fi; }
+
+# see http://www.chemistry.ucsc.edu/~wgscott/xtal/zsh.html
+pico () {
+        LIMIT=$#
+        for ((i = 1; i <= $LIMIT; i++ )) do
+                eval file="\$$i"
+                if [[ -e $file && ! -O $file ]]
+                then
+                        otherfile=1
+                else
+
+                fi
+        done
+        if [[ $otherfile = 1 ]]
+        then
+                sudo pico "$@"
+        else
+                command pico "$@"
+        fi
+}
+
+
+##########  Set iterm window and tabs
+# %m is $HOST, \e]2 sets the window titlebar, \e]2 sets the tab
+
+if [ ${+SSH_CLIENT} -eq 0 ]; then # not connecting by SSH
+	# sets the title to cwd
+	precmd () { print -Pn "\e]1;%2~\a" ; print -Pn "\e]2;[%m] %~\a" }
+	# sets title to running process
+	preexec () { print -Pn "\e]1;$1\a" ; print -Pn "\e]2;[%m] %~ : $1\a" }
+else
+	# sets the title to cwd
+	precmd () { print -Pn "\e]1;[%2~]\a" ; print -Pn "\e]2;[%m] %~\a" }
+	# sets title to running process
+	preexec () { print -Pn "\e]1;[$1]\a" ; print -Pn "\e]2;[%m] %~ : $1\a" }
+fi
+
+function tab {
+
+	if [[ -z $1 ]]; then
+		d=`pwd`
+	elif [[ -d "$1" ]]; then
+		d=$1
+	else
+		print "usage: tab [directory]"
+		return 1		
+	fi
+	
+ 	abs=`python -c "import os, sys; print os.path.abspath(\"$d\")"`
+
+	osascript <<-eof
+	tell application "iTerm"
+		activate
+		tell the front terminal
+			launch session "Default Session"
+			tell the last session
+				write text "cd \"$abs\""
+			end tell
+		end tell
+	end tell
+	eof
+}
+
+# cdf: cd's to frontmost window of Finder
+function cdf { 
+    currFolderPath=$( /usr/bin/osascript <<"    EOT"
+        tell application "Finder"
+            try
+                set currFolder to (folder of the front window as alias)
+            on error
+                set currFolder to (path to desktop folder as alias)
+            end try
+            POSIX path of currFolder
+        end tell
+    EOT
+    )
+    echo "cd "$currFolderPath""
+    cd "$currFolderPath"
+}
+
+
+# set new finder window to current directory
+function fcd {
+
+if [ $# -eq 0 ]; then
+	path="$PWD"
+else
+	path="$*"
+fi
+
+/usr/bin/osascript << EOT
+
+tell application "Finder"
+	activate
+	try
+		select Finder window 1
+	on error
+		make new Finder window
+		select Finder window 1
+	end try
+	set a to POSIX file "$path"
+	set target of Finder window 1 to folder a
+end tell
+
+EOT
+}
+
+# pull/push contents of current directory to/from usb key
+function jump {
+jump="/Volumes/JUMPDRIVE"
+
+if [[ $1 != "get" && $1 != "put" ]]; then
+	echo "Usage jump get|put"
+	echo "syncs contents of PWD with corresponding folder on USB jumpdrive"
+	return
+fi
+
+if [[ -d $jump ]]; then
+	echo "jump drive in place"
+else
+	echo "could not find $jump"
+	return
+fi
+
+remote=${jump}/${PWD:t}
+local=${HOME}/${PWD:t}
+
+if [[ $1 = "get" ]]; then
+	echo "execute the following? (return for yes, Ctrl-C)"
+	echo "rsync --delete-after -azv \"$remote/\" \"$local\" "
+	read response
+	rsync -azv --delete-after "$remote/" "$local"
+elif [[ $1 = "put" ]]; then
+	echo "execute the following? (return for yes, Ctrl-C)"
+	echo "rsync -azv --delete-after \"$local/\" \"$remote\" "
+	read response
+	rsync -azv --delete-after "$local/" "$remote"
+fi
+}
+
+function tiff2png {
+/usr/local/bin/python << EOT
+import sys, os, glob
+for file in glob.glob('*.tiff'):
+
+	fileroot = os.path.splitext(file)[0]
+	cmd = 'sips -s format png "%(file)s" --out "%(fileroot)s.png"' % locals()
+	print cmd
+	os.system(cmd)
+
+EOT
+}
+
+function pbspell {
+
+tname=`python -c 'import random,string; print "".join([random.choice(string.letters) for i in range(10)])'`
+
+pbpaste > /tmp/${tname}.txt
+aspell -c /tmp/${tname}.txt
+cat /tmp/${tname}.txt | pbcopy
+}

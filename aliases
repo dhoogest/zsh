@@ -1,0 +1,61 @@
+if [ $NOISY ]; then
+	echo "reading ~/Library/init/zsh/aliases"
+fi
+
+#$Id: aliases,v 1.9 2005/12/23 05:22:52 nghoffma Exp $
+
+alias lsa='ls -AFlh --color=always'
+alias lsd='ls -AFldh --color=always'
+alias conns='netstat -a | egrep "(Proto)|tcp"'
+alias netconns='netstat -a -f inet'
+alias pdsa='ps -axww'
+alias psa='ps -auxww'
+alias psl='ps -alxww'
+alias psj='ps -axjww'
+alias pso='ps -axwwo uid,pid,ppid,pgid,pri,nice,state,time,%cpu,%mem,command'
+alias finkup='fink selfupdate-cvs'
+alias x='/Applications/XDarwin.app/Contents/MacOS/XDarwin &'
+alias cd..='cd ..'
+alias ..='cd ..'
+alias owd='cd "$OLDPWD"'
+alias rehash='hash -r'
+
+alias ls='ls -F'
+
+# aliases using 'open'
+if [[ $USER = "nghoffma" ]]; then
+	OFFICE="/Applications/Microsoft Office X"
+else
+	OFFICE="/Applications/Microsoft Office 2004"
+fi
+
+USER_APPS="${HOME}/Applications"
+
+alias bb='/usr/bin/bbedit $*'
+alias excel="open -a \"${OFFICE}/Microsoft Excel\" "
+alias mword="open -a \"${OFFICE}//Microsoft Word\" "
+alias preview='open -a /Applications/Preview.app $*'
+alias treeview="open -a \"${USER_APPS}/TreeView X.app\" $*"
+
+alias path="python -c 'import os, sys; print os.path.abspath(sys.argv[1])' $1"
+alias ds="${HOME}/bin2/datestamp.py"
+
+alias labmedh='ssh -l labmed1 homer.u.washington.edu'
+alias labmedo='ssh -l labmed1 ovid.u.washington.edu'
+alias labmedf='sftp labmed1@homer.u.washington.edu'
+
+alias mdxh='ssh -l mdx homer.u.washington.edu'
+alias mdxo='ssh -l mdx ovid.u.washington.edu'
+alias mdxf='sftp mdx@homer.u.washington.edu'
+
+# see http://www.macosxhints.com/article.php?story=20050809160807834
+alias bbremote='ssh nghoffma@$REMOTEHOST bbedit "sftp://$USER@$HOST/$PWD/!:1"'
+
+alias nobreak='pbpaste | lconv -n - | pbcopy'
+alias ubreak='pbpaste | lconv -u - | pbcopy'
+alias dbreak='pbpaste | lconv -d - | pbcopy'
+alias sj="pbpaste | python -c 'import sys; print \" \".join(sys.stdin.read().split())' | pbcopy"
+
+alias sipsi='sips -g pixelHeight -g pixelWidth -g typeIdentifier -g dpiHeight -g dpiWidth $*'
+
+alias cvsdiff='cvs diff -y --suppress-common-lines $*'
