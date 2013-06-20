@@ -401,8 +401,8 @@ if [[ -o interactive ]]; then
 	bindkey '^[b' emacs-backward-word
 	bindkey '^[f' emacs-forward-word
 	bindkey '^[v' expand-or-complete-prefix
-	bindkey '^[[1;5C' forward-word
-	bindkey '^[[1;5D' backward-word
+	bindkey '^[[1;9C' forward-word
+	bindkey '^[[1;9D' backward-word
 
 	# Fix weird sequence that rxvt produces
 	bindkey -s '^[[Z' '\t'
